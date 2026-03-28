@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Karim Hossam — Full Stack .NET Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+   ============================================================ */
+:root {
+  --cyan:        #00e5c0;
+  --cyan-dim:    rgba(0,229,192,0.09);
+  --cyan-mid:    rgba(0,229,192,0.28);
+  --cyan-bright: rgba(0,229,192,0.52);
+
+  /* Deep navy / charcoal — richer than pure black */
+  --bg:      #0b1120;
+  --bg2:     #0f1829;
+  --bg3:     #121e32;
+  --surface: #16243c;
+  --surface2:#1d2f4c;
+  --surface3:#243455;
+
+  --border:      rgba(0,229,192,0.13);
+  --border-soft: rgba(255,255,255,0.05);
+  --text:        #c6ddf0;
+  --text-dim:    #607d99;
+  --text-faint:  #304560;
+
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+  --radius: 14px;
+  --glow:        0 0 22px rgba(0,229,192,0.20), 0 0 70px rgba(0,229,192,0.06);
+  --glow-strong: 0 0 34px rgba(0,229,192,0.40), 0 0 90px rgba(0,229,192,0.12);
+  --shadow: 0 20px 60px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04) inset;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background: linear-gradient(180deg,#0d1528 0%,#0b1120 28%,#0e1830 56%,#091018 100%) fixed;
+  color:var(--text);
+  font-family:var(--mono);
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* Noise texture */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size:300px;opacity:0.55;
+}
+/* Scanline */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,229,192,0.011) 3px,rgba(0,229,192,0.011) 4px);
+}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--cyan-mid);border-radius:2px;}
+
+/* ============================================================
+   CURSOR
+   ============================================================ */
+.cursor{
+  position:fixed;width:10px;height:10px;background:var(--cyan);border-radius:50%;
+  pointer-events:none;z-index:10000;transform:translate(-50%,-50%);
+  transition:width .2s,height .2s;mix-blend-mode:screen;
+}
+.cursor-ring{
+  position:fixed;width:34px;height:34px;border:1.5px solid var(--cyan-mid);border-radius:50%;
+  pointer-events:none;z-index:9999;transform:translate(-50%,-50%);
+  transition:width .25s,height .25s,border-color .2s;
+}
+
+/* ============================================================
+   LOADER
+   ============================================================ */
+#loader{
+  position:fixed;inset:0;z-index:9998;
+  background:linear-gradient(135deg,#08101e 0%,#0c1526 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .7s,visibility .7s;
+}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.loader-logo{font-family:var(--sans);font-size:2.6rem;font-weight:800;color:#e8f4ff;letter-spacing:-0.02em;margin-bottom:.3rem;}
+.loader-logo span{color:var(--cyan);}
+.loader-sub{font-family:var(--mono);font-size:.68rem;color:var(--text-dim);letter-spacing:.22em;margin-bottom:2rem;}
+.loader-bar{width:220px;height:2px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.loader-fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),#00b4ff);animation:fill 1.9s ease forwards;box-shadow:var(--glow);}
+@keyframes fill{to{width:100%;}}
+@keyframes blink{50%{opacity:0;}}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;height:66px;
+  padding:0 2.5rem;display:flex;align-items:center;justify-content:space-between;
+  transition:background .4s,border-color .4s,box-shadow .4s;
+  border-bottom:1px solid transparent;
+}
+nav.scrolled{
+  background:rgba(11,17,32,.9);
+  backdrop-filter:blur(24px) saturate(200%);
+  border-color:var(--border);
+  box-shadow:0 4px 40px rgba(0,0,0,.45);
+}
+.nav-logo{
+  font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--cyan);
+  text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:.05em;
+}
+.nav-logo::before{content:'>';animation:blink 1s steps(1) infinite;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{
+  font-family:var(--mono);font-size:.71rem;color:var(--text-dim);text-decoration:none;
+  letter-spacing:.12em;text-transform:uppercase;position:relative;padding-bottom:4px;transition:color .2s;
+}
+.nav-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:var(--cyan);transition:width .3s;}
+.nav-links a:hover,.nav-links a.active{color:var(--cyan);}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;}
+.hamburger span{width:24px;height:2px;background:var(--cyan);display:block;transition:transform .3s,opacity .3s;}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+.hamburger.open span:nth-child(2){opacity:0;}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+.mobile-menu{
+  display:none;position:fixed;top:66px;left:0;right:0;z-index:999;
+  background:rgba(11,17,32,.97);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);padding:1.5rem 2rem;
+  flex-direction:column;gap:1.2rem;
+}
+.mobile-menu.open{display:flex;}
+.mobile-menu a{font-family:var(--mono);font-size:.82rem;color:var(--text-dim);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:color .2s;}
+.mobile-menu a:hover{color:var(--cyan);}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+#hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:110px 2rem 70px;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 110% 65% at 50% -5%,rgba(0,229,192,.065) 0%,transparent 65%);
+}
+/* Dot-grid texture */
+#hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(0,229,192,.17) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 72% 60% at 50% 50%,#000 15%,transparent 78%);
+}
+.hero-blob{
+  position:absolute;width:720px;height:720px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(0,229,192,.05) 0%,transparent 65%);
+  top:50%;left:50%;transform:translate(-50%,-55%);
+  animation:pulse 5.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:translate(-50%,-55%) scale(1);}50%{transform:translate(-50%,-55%) scale(1.12);}}
+
+.hero-inner{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;z-index:3;max-width:840px;}
+
+/* Profile */
+.profile-wrap{position:relative;margin-bottom:2.8rem;animation:float 7s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-13px);}}
+.profile-img{
+  width:168px;height:168px;border-radius:50%;
+  border:2px solid var(--cyan);
+  box-shadow:0 0 0 9px var(--cyan-dim),var(--glow-strong),0 24px 64px rgba(0,0,0,.65);
+  background:linear-gradient(135deg,var(--surface),var(--surface2));
+  display:flex;align-items:center;justify-content:center;font-size:4.4rem;
+}
+.profile-ring{
+  position:absolute;inset:-14px;border-radius:50%;
+  border:1px dashed rgba(0,229,192,.32);animation:spin 22s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.profile-ring::before{
+  content:'';position:absolute;top:-5px;left:50%;transform:translateX(-50%);
+  width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:var(--glow-strong);
+}
+.status-badge{
+  position:absolute;bottom:6px;right:-4px;
+  background:var(--surface2);border:1px solid var(--cyan-mid);border-radius:20px;
+  padding:4px 12px;font-size:.61rem;color:var(--cyan);letter-spacing:.1em;
+  display:flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.status-dot{width:6px;height:6px;border-radius:50%;background:#00ff88;box-shadow:0 0 7px #00ff88;animation:blink 2s ease-in-out infinite;}
+
+.hero-prompt{font-family:var(--mono);font-size:.71rem;color:var(--text-faint);margin-bottom:.8rem;letter-spacing:.2em;}
+.hero-name{font-family:var(--sans);font-size:clamp(2.9rem,7vw,5.4rem);font-weight:800;line-height:1;color:#e8f4ff;letter-spacing:-.025em;margin-bottom:1rem;}
+.hero-name span{color:var(--cyan);}
+.hero-tagline{font-family:var(--mono);font-size:clamp(.67rem,2vw,.87rem);color:var(--text-dim);letter-spacing:.08em;margin-bottom:.6rem;}
+.typing-line{
+  font-family:var(--mono);font-size:clamp(.77rem,2.2vw,.97rem);
+  color:var(--cyan);height:28px;margin-bottom:2.8rem;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.typing-line::before{content:'$';color:var(--text-faint);}
+#typed-text{border-right:2px solid var(--cyan);padding-right:3px;animation:cursor-blink .7s steps(1) infinite;}
+@keyframes cursor-blink{50%{border-color:transparent;}}
+
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:3.2rem;}
+.btn{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;padding:.9rem 1.9rem;border-radius:7px;text-decoration:none;cursor:pointer;transition:all .25s;display:inline-flex;align-items:center;gap:8px;border:none;}
+.btn-primary{background:var(--cyan);color:#000;font-weight:700;box-shadow:0 0 26px rgba(0,229,192,.3);}
+.btn-primary:hover{background:#fff;box-shadow:0 0 40px rgba(0,229,192,.65);transform:translateY(-2px);}
+.btn-outline{background:transparent;color:var(--cyan);border:1px solid var(--cyan-mid);}
+.btn-outline:hover{background:var(--cyan-dim);box-shadow:var(--glow);transform:translateY(-2px);}
+
+.scroll-indicator{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-faint);font-size:.61rem;letter-spacing:.18em;animation:bounce 2.5s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
+.scroll-mouse{width:24px;height:38px;border:1.5px solid var(--text-faint);border-radius:12px;display:flex;align-items:flex-start;justify-content:center;padding-top:6px;}
+.scroll-wheel{width:3px;height:8px;background:var(--cyan);border-radius:2px;animation:scroll-anim 2.2s ease-in-out infinite;}
+@keyframes scroll-anim{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(10px);opacity:0;}}
+
+/* ============================================================
+   SHARED SECTION STYLES
+   ============================================================ */
+section{padding:110px 2rem;position:relative;z-index:3;}
+.section-header{text-align:center;margin-bottom:4.5rem;}
+.section-label{
+  font-family:var(--mono);font-size:.67rem;color:var(--cyan);letter-spacing:.28em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:1rem;
+}
+.section-label::before,.section-label::after{content:'';flex:1;max-width:60px;height:1px;background:var(--cyan-mid);}
+.section-title{font-family:var(--sans);font-size:clamp(2rem,5vw,3.2rem);font-weight:800;color:#e8f4ff;letter-spacing:-.025em;}
+.section-title span{color:var(--cyan);}
+.container{max-width:1100px;margin:0 auto;}
+
+/* Alternating section backgrounds */
+#about              {background:linear-gradient(180deg,#0f1829 0%,#101d30 100%);}
+#education          {background:linear-gradient(180deg,#0b1120 0%,#0f1829 100%);}
+#training           {background:linear-gradient(180deg,#0f1829 0%,#0c152a 100%);}
+#skills             {background:linear-gradient(180deg,#0b1120 0%,#0f1829 100%);}
+#projects           {background:linear-gradient(180deg,#0f1829 0%,#0b1120 100%);}
+#contact-links      {background:linear-gradient(180deg,#0b1120 0%,#0f1829 100%);}
+#contact-form-section{background:linear-gradient(180deg,#0f1829 0%,#0b1120 100%);}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4.5rem;align-items:start;}
+.about-text h3{font-family:var(--sans);font-size:1.44rem;font-weight:700;color:#e8f4ff;margin-bottom:1.2rem;}
+.about-text p{font-family:var(--mono);font-size:.8rem;line-height:2.1;color:var(--text-dim);margin-bottom:1rem;}
+.about-text p strong{color:var(--cyan);}
+.about-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:1.6rem;}
+.about-tag{font-family:var(--mono);font-size:.62rem;padding:5px 13px;border:1px solid var(--border);border-radius:4px;color:var(--text-dim);letter-spacing:.07em;background:var(--surface);}
+
+/* Code card */
+.code-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .35s,box-shadow .35s;}
+.code-card:hover{transform:rotateY(-6deg) rotateX(2deg) scale(1.03);box-shadow:var(--glow),var(--shadow);}
+.code-card-header{background:var(--surface2);padding:12px 18px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dot-r{background:#ff5f57;}.dot-y{background:#febc2e;}.dot-g{background:#28c840;}
+.code-card-header span{font-family:var(--mono);font-size:.67rem;color:var(--text-dim);margin-left:auto;letter-spacing:.08em;}
+.code-body{padding:1.6rem;font-family:var(--mono);font-size:.76rem;line-height:2;overflow-x:auto;}
+.kw{color:#c678dd;}.cl{color:#e5c07b;}.str{color:#98c379;}.cm{color:#405870;font-style:italic;}
+.prop{color:#e06c75;}.val{color:var(--cyan);}
+.ln{color:var(--text-faint);user-select:none;margin-right:18px;display:inline-block;width:20px;text-align:right;}
+
+/* ============================================================
+   EDUCATION — Timeline + Storytelling
+   ============================================================ */
+.edu-story{max-width:880px;margin:0 auto;}
+.edu-timeline{position:relative;padding-left:3rem;}
+.edu-timeline::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:linear-gradient(180deg,var(--cyan-mid) 0%,rgba(0,229,192,.05) 100%);
+  border-radius:2px;
+}
+.edu-node{position:relative;margin-bottom:2.4rem;}
+.edu-node::before{
+  content:'';position:absolute;left:-3.46rem;top:1.5rem;
+  width:14px;height:14px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 0 5px var(--bg2),var(--glow-strong);
+}
+.edu-card-v2{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:2.2rem 2.4rem;box-shadow:var(--shadow);
+  position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s;
+}
+.edu-card-v2::before{
+  content:'';position:absolute;top:0;right:0;width:220px;height:220px;pointer-events:none;
+  background:radial-gradient(circle at top right,rgba(0,229,192,.055),transparent 70%);
+}
+.edu-card-v2:hover{border-color:var(--cyan-mid);box-shadow:var(--glow),var(--shadow);}
+.edu-card-top{display:flex;align-items:flex-start;gap:1.5rem;margin-bottom:1.6rem;}
+.edu-icon-v2{
+  width:62px;height:62px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--cyan-dim),rgba(0,150,255,.1));
+  border:1px solid var(--cyan-mid);display:flex;align-items:center;justify-content:center;font-size:1.7rem;
+}
+.edu-meta h3{font-family:var(--sans);font-size:1.32rem;font-weight:700;color:#e8f4ff;margin-bottom:.35rem;}
+.edu-degree{font-family:var(--mono);font-size:.77rem;color:var(--cyan);margin-bottom:.55rem;letter-spacing:.04em;}
+.edu-pills{display:flex;flex-wrap:wrap;gap:8px;}
+.edu-pill{font-family:var(--mono);font-size:.61rem;padding:3px 10px;border:1px solid var(--border);border-radius:4px;color:var(--text-dim);background:var(--surface2);letter-spacing:.06em;display:flex;align-items:center;gap:5px;}
+.edu-story-body{border-top:1px solid var(--border);padding-top:1.5rem;}
+.edu-story-body p{font-family:var(--mono);font-size:.79rem;line-height:2.1;color:var(--text-dim);margin-bottom:.9rem;}
+.edu-story-body p:last-child{margin-bottom:0;}
+.edu-story-body strong{color:var(--cyan);}
+.edu-story-body em{color:#90b8d5;font-style:normal;}
+
+/* ============================================================
+   TRAINING & EXPERIENCE
+   ============================================================ */
+.training-wrap{max-width:880px;margin:0 auto;}
+.training-card{
+  background:var(--surface);border:1px solid var(--cyan-mid);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--glow),var(--shadow);position:relative;
+}
+.training-card::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--cyan),rgba(0,229,192,.18));
+}
+.training-card::after{
+  content:'';position:absolute;top:-70px;right:-70px;width:220px;height:220px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(0,229,192,.07),transparent 70%);
+}
+.training-header{
+  background:linear-gradient(90deg,rgba(0,229,192,.07),transparent);
+  padding:1.9rem 2.4rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+}
+.training-org{display:flex;align-items:center;gap:1.2rem;}
+.training-org-icon{
+  width:54px;height:54px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(0,229,192,.14),rgba(0,150,255,.09));
+  border:1px solid var(--cyan-mid);display:flex;align-items:center;justify-content:center;font-size:1.55rem;
+}
+.training-org-name{font-family:var(--sans);font-size:1.18rem;font-weight:700;color:#e8f4ff;margin-bottom:.2rem;}
+.training-org-sub{font-family:var(--mono);font-size:.71rem;color:var(--cyan);letter-spacing:.05em;}
+.training-badge{
+  font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+  padding:7px 17px;border-radius:20px;white-space:nowrap;
+  background:rgba(0,229,192,.11);border:1px solid var(--cyan-mid);color:var(--cyan);
+  display:flex;align-items:center;gap:8px;
+}
+.badge-dot{width:7px;height:7px;border-radius:50%;background:#00ff88;box-shadow:0 0 8px #00ff88;animation:blink 1.8s ease-in-out infinite;}
+.training-body{padding:2.1rem 2.4rem;}
+.training-body p{font-family:var(--mono);font-size:.79rem;line-height:2.05;color:var(--text-dim);margin-bottom:1rem;}
+.training-body p:last-child{margin-bottom:0;}
+.training-body strong{color:var(--cyan);}
+.training-highlights{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.8rem;}
+.highlight-item{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:1rem 1.2rem;display:flex;align-items:center;gap:12px;
+  transition:border-color .25s,transform .25s;
+}
+.highlight-item:hover{border-color:var(--cyan-mid);transform:translateY(-3px);}
+.highlight-item i{color:var(--cyan);font-size:1rem;width:20px;text-align:center;}
+.highlight-item span{font-family:var(--mono);font-size:.73rem;color:var(--text);}
+
+/* ============================================================
+   SKILLS
+   ============================================================ */
+.skills-categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.4rem;}
+.skill-category{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.6rem;box-shadow:var(--shadow);transition:border-color .3s,transform .3s,box-shadow .3s;}
+.skill-category:hover{border-color:var(--cyan-mid);transform:translateY(-5px);box-shadow:var(--glow),var(--shadow);}
+.skill-cat-title{font-family:var(--mono);font-size:.67rem;color:var(--cyan);letter-spacing:.16em;text-transform:uppercase;margin-bottom:1.3rem;display:flex;align-items:center;gap:8px;}
+.skill-cat-title::before{content:'#';font-weight:700;color:var(--text-faint);}
+.skill-chips{display:flex;flex-direction:column;gap:8px;}
+.skill-chip{font-family:var(--mono);font-size:.73rem;padding:9px 13px;border-radius:7px;background:var(--surface2);border:1px solid transparent;color:var(--text);display:flex;align-items:center;gap:10px;transition:all .25s;cursor:default;}
+.skill-chip:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim);box-shadow:var(--glow);transform:translateX(5px);}
+.skill-chip i{font-size:.87rem;color:var(--cyan);width:16px;text-align:center;}
+
+/* ============================================================
+   PROJECTS
+   ============================================================ */
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;}
+.project-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .35s;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+.project-card:hover{border-color:var(--cyan-mid);transform:translateY(-9px);box-shadow:var(--glow),0 30px 70px rgba(0,0,0,.6);}
+.project-img{height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:4.2rem;}
+.project-img.clinic{background:linear-gradient(135deg,#0d1f3c,#1a3a5c);}
+.project-img.ecom  {background:linear-gradient(135deg,#1a0d3c,#3c1a5c);}
+.project-img.learn {background:linear-gradient(135deg,#0d3c1a,#1a5c3a);}
+.project-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,var(--surface) 0%,transparent 55%);}
+.project-body{padding:1.6rem;flex:1;display:flex;flex-direction:column;}
+.project-title{font-family:var(--sans);font-size:1.1rem;font-weight:700;color:#e8f4ff;margin-bottom:.6rem;}
+.project-desc{font-family:var(--mono);font-size:.73rem;line-height:1.95;color:var(--text-dim);flex:1;margin-bottom:1rem;}
+.tech-stack{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.2rem;}
+.tech-tag{font-family:var(--mono);font-size:.59rem;padding:3px 10px;border:1px solid var(--border);border-radius:4px;color:var(--text-dim);letter-spacing:.04em;}
+.project-links{display:flex;gap:10px;}
+.project-link{font-family:var(--mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border-radius:6px;text-decoration:none;transition:all .22s;display:flex;align-items:center;gap:6px;flex:1;justify-content:center;}
+.project-link-gh{background:transparent;color:var(--text-dim);border:1px solid var(--border);}
+.project-link-gh:hover{color:var(--cyan);border-color:var(--cyan);background:var(--cyan-dim);}
+.project-link-demo{background:var(--cyan-dim);color:var(--cyan);border:1px solid var(--cyan-mid);}
+.project-link-demo:hover{background:var(--cyan);color:#000;box-shadow:var(--glow);}
+
+/* ============================================================
+   CONTACT INFO
+   ============================================================ */
+.contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.2rem;}
+.contact-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;display:flex;align-items:center;gap:1rem;text-decoration:none;transition:all .25s;box-shadow:var(--shadow);}
+.contact-card:hover{border-color:var(--cyan-mid);transform:translateY(-5px);box-shadow:var(--glow),var(--shadow);}
+.contact-icon{width:46px;height:46px;border-radius:10px;flex-shrink:0;background:var(--cyan-dim);border:1px solid var(--cyan-mid);display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:var(--cyan);}
+.contact-info{overflow:hidden;}
+.contact-label{font-family:var(--mono);font-size:.62rem;color:var(--text-faint);letter-spacing:.14em;text-transform:uppercase;}
+.contact-value{font-family:var(--mono);font-size:.76rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.contact-card:hover .contact-value{color:var(--cyan);}
+
+/* ============================================================
+   CONTACT FORM
+   ============================================================ */
+.form-wrap{max-width:650px;margin:0 auto;}
+.form-group{margin-bottom:1.3rem;}
+.form-label{font-family:var(--mono);font-size:.67rem;color:var(--text-dim);letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:7px;}
+.form-label span{color:var(--cyan);}
+.form-input,.form-textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:.95rem 1.1rem;font-family:var(--mono);font-size:.8rem;color:var(--text);transition:all .25s;outline:none;resize:vertical;}
+.form-input:focus,.form-textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim);}
+.form-input.error,.form-textarea.error{border-color:#ff5f57;}
+.form-textarea{min-height:150px;}
+.form-submit{width:100%;padding:1.05rem;font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;background:linear-gradient(90deg,var(--cyan),#00bff0);color:#000;border:none;border-radius:9px;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.form-submit:hover{box-shadow:var(--glow-strong);transform:translateY(-2px);filter:brightness(1.08);}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;z-index:5000;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.5rem;font-family:var(--mono);font-size:.76rem;display:flex;align-items:center;gap:12px;transform:translateY(100px);opacity:0;transition:all .42s cubic-bezier(.34,1.56,.64,1);max-width:340px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:var(--cyan);color:var(--cyan);}
+.toast.error{border-color:#ff5f57;color:#ff5f57;}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{background:#080f1e;border-top:1px solid var(--border);padding:2.2rem;text-align:center;position:relative;z-index:3;}
+footer p{font-family:var(--mono);font-size:.69rem;color:var(--text-dim);}
+footer span{color:var(--cyan);}
+
+/* ============================================================
+   SCROLL ANIMATIONS
+   ============================================================ */
+.fade-up{opacity:0;transform:translateY(32px);transition:opacity .65s ease,transform .65s ease;}
+.fade-up.visible{opacity:1;transform:translateY(0);}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:900px){
+  .about-grid{grid-template-columns:1fr;}
+  .edu-card-top{flex-direction:column;}
+}
+@media(max-width:640px){
+  nav{padding:0 1.2rem;}
+  .nav-links{display:none;}
+  .hamburger{display:flex;}
+  section{padding:80px 1.2rem;}
+  .hero-btns{flex-direction:column;align-items:center;}
+  .btn{width:215px;justify-content:center;}
+  .contact-grid{grid-template-columns:1fr;}
+  .projects-grid{grid-template-columns:1fr;}
+  .training-header{flex-direction:column;align-items:flex-start;}
+  .edu-timeline{padding-left:2rem;}
+  .edu-node::before{left:-2.46rem;}
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="loader-logo">Karim<span>.</span></div>
+  <div class="loader-sub">// loading portfolio...</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><i class="fas fa-terminal"></i><span id="toast-msg"></span></div>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">KH</a>
+  <ul class="nav-links">
+    <li><a href="#hero" class="active">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#training">Training</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact-links">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#hero">Home</a><a href="#about">About</a><a href="#education">Education</a>
+  <a href="#training">Training</a><a href="#skills">Skills</a>
+  <a href="#projects">Projects</a><a href="#contact-links">Contact</a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-inner">
+    <div class="profile-wrap">
+      <div class="profile-ring"></div>
+      <div class="profile-img" aria-label="Karim Hossam">🧑‍💻</div>
+      <div class="status-badge"><span class="status-dot"></span> Available for work</div>
+    </div>
+    <div class="hero-prompt">// karim.hossam.profile</div>
+    <h1 class="hero-name">Karim <span>Hossam</span></h1>
+    <p class="hero-tagline">Full Stack .NET Developer &nbsp;|&nbsp; ASP.NET Core &nbsp;|&nbsp; SQL Server</p>
+    <div class="typing-line"><span id="typed-text"></span></div>
+    <div class="hero-btns">
+      <a href="Karim_Hossam_CV.pdf" download class="btn btn-primary"><i class="fas fa-download"></i> Download CV</a>
+      <a href="#projects" class="btn btn-outline"><i class="fas fa-code"></i> View Projects</a>
+      <a href="#contact-links" class="btn btn-outline"><i class="fas fa-terminal"></i> Contact Me</a>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+      <span>scroll</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">About Me</div>
+      <h2 class="section-title">Who I <span>Am</span></h2>
+    </div>
+    <div class="about-grid">
+      <div class="about-text fade-up">
+        <h3>Building robust systems, one endpoint at a time.</h3>
+        <p>I'm <strong>Karim Hossam</strong>, a Full Stack .NET Developer with a genuine passion for writing clean, purposeful code. I studied at <strong>El Shorouk Academy</strong>, where a solid Computer Science foundation gave me the tools to think critically and build confidently.</p>
+        <p>My focus lives in the <strong>backend</strong> — designing APIs that are intuitive, systems that scale gracefully, and databases that are queried with precision. I work primarily within the <strong>.NET ecosystem</strong>, building with ASP.NET Core, C#, Entity Framework, and SQL Server.</p>
+        <p>I believe great software isn't just functional — it's maintainable, readable, and built with intent. Whether architecting a RESTful service or debugging a tricky query at midnight, I bring the same level of care to every layer of the stack.</p>
+        <div class="about-tags">
+          <span class="about-tag">Clean Architecture</span>
+          <span class="about-tag">API-First Thinking</span>
+          <span class="about-tag">Problem Solver</span>
+          <span class="about-tag">Team Player</span>
+          <span class="about-tag">Continuous Learner</span>
+        </div>
+      </div>
+      <div class="code-card fade-up">
+        <div class="code-card-header">
+          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+          <span>KarimHossam.cs</span>
+        </div>
+        <div class="code-body">
+<span class="ln">1</span><span class="kw">public class</span> <span class="cl">KarimHossam</span> : <span class="cl">Developer</span>
+<span class="ln">2</span>{
+<span class="ln">3</span>  <span class="kw">public</span> <span class="cl">string</span> <span class="prop">Name</span>      = <span class="str">"Karim Hossam"</span>;
+<span class="ln">4</span>  <span class="kw">public</span> <span class="cl">string</span> <span class="prop">Role</span>      = <span class="str">"Full Stack .NET Dev"</span>;
+<span class="ln">5</span>  <span class="kw">public</span> <span class="cl">string</span> <span class="prop">Education</span> = <span class="str">"El Shorouk Academy"</span>;
+<span class="ln">6</span>  <span class="kw">public</span> <span class="cl">string</span> <span class="prop">Training</span>  = <span class="str">"DEPI — .NET Track"</span>;
+<span class="ln">7</span><br>
+<span class="ln">8</span>  <span class="kw">public</span> <span class="cl">List</span>&lt;<span class="cl">string</span>&gt; <span class="prop">Stack</span> = <span class="kw">new</span>()
+<span class="ln">9</span>  {
+<span class="ln">10</span>    <span class="str">"C#"</span>, <span class="str">"ASP.NET Core"</span>,
+<span class="ln">11</span>    <span class="str">"SQL Server"</span>, <span class="str">"EF Core"</span>,
+<span class="ln">12</span>    <span class="str">"TypeScript"</span>, <span class="str">"REST APIs"</span>
+<span class="ln">13</span>  };
+<span class="ln">14</span><br>
+<span class="ln">15</span>  <span class="kw">public bool</span> <span class="prop">IsAvailable</span>  => <span class="val">true</span>;
+<span class="ln">16</span>  <span class="kw">public bool</span> <span class="prop">LovesBackend</span> => <span class="val">true</span>;
+<span class="ln">17</span>  <span class="cm">// Always learning, always shipping.</span>
+<span class="ln">18</span>}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EDUCATION ===== -->
+<section id="education">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Education</div>
+      <h2 class="section-title">The <span>Foundation</span></h2>
+    </div>
+    <div class="edu-story fade-up">
+      <div class="edu-timeline">
+        <div class="edu-node">
+          <div class="edu-card-v2">
+            <div class="edu-card-top">
+              <div class="edu-icon-v2">🏛️</div>
+              <div class="edu-meta">
+                <h3>El Shorouk Academy</h3>
+                <div class="edu-degree">B.Sc. Computer Science — Software Development Track</div>
+                <div class="edu-pills">
+                  <span class="edu-pill"><i class="fas fa-map-marker-alt" style="color:var(--cyan)"></i> El Shorouk City, Cairo</span>
+                  <span class="edu-pill"><i class="fas fa-graduation-cap" style="color:var(--cyan)"></i> Faculty of Computer Science</span>
+                  <span class="edu-pill"><i class="fas fa-code" style="color:var(--cyan)"></i> Software Development</span>
+                </div>
+              </div>
+            </div>
+            <div class="edu-story-body">
+              <p>My journey into software started long before college — with curiosity, a lot of late-night tutorials, and a growing obsession with <strong>understanding how things actually work under the hood</strong>. El Shorouk Academy gave that curiosity a structure. Studying Computer Science there didn't just teach me syntax or theory — it taught me how to <em>think like an engineer</em>.</p>
+              <p>Throughout my studies, I gravitated strongly toward <strong>backend development</strong> — the part of software that most people never see, but that makes everything else possible. I became fascinated by how a well-designed API can power an entire product, how proper database indexing can cut response time by an order of magnitude, and how clean architecture keeps a codebase maintainable as it grows in complexity.</p>
+              <p>The <strong>.NET ecosystem</strong> quickly became my home. C# felt natural — expressive, structured, and powerful. ASP.NET Core gave me everything needed to build real production-grade systems. SQL Server taught me that data design is as important as application code. Over time I expanded outward — picking up frontend skills in HTML, CSS, TypeScript, and JavaScript — becoming a developer who can own the full stack, not just a corner of it.</p>
+              <p>More than any specific technology, my education gave me a mindset: <strong>never stop asking why</strong>. Every project I've built since has been an extension of that — understanding deeply, building carefully, and always shipping something I'm proud of.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRAINING & EXPERIENCE ===== -->
+<section id="training">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Training &amp; Experience</div>
+      <h2 class="section-title">Real-World <span>Practice</span></h2>
+    </div>
+    <div class="training-wrap fade-up">
+      <div class="training-card">
+        <div class="training-header">
+          <div class="training-org">
+            <div class="training-org-icon">🇪🇬</div>
+            <div>
+              <div class="training-org-name">Digital Egypt Pioneers Initiative</div>
+              <div class="training-org-sub">DEPI — Ministry of Communications &amp; IT, Egypt</div>
+            </div>
+          </div>
+          <div class="training-badge"><span class="badge-dot"></span> In Progress — Trainee</div>
+        </div>
+        <div class="training-body">
+          <p>I'm currently enrolled in the <strong>Digital Egypt Pioneers Initiative (DEPI)</strong>, a national training program backed by Egypt's Ministry of Communications and Information Technology. My track is <strong>Full Stack .NET Developer</strong> — and it has been one of the most hands-on, practically focused learning experiences I've had.</p>
+          <p>Unlike purely academic study, DEPI puts you inside real development workflows from the very first week. I've been building and consuming APIs with <strong>ASP.NET Core</strong>, designing <strong>SQL Server</strong> databases with proper normalization and indexing strategies, and working with <strong>Entity Framework Core</strong> for clean, maintainable data access layers. The program is deeply rooted in industry practices — version control with Git, peer code reviews, structured debugging, and delivering working features under realistic constraints.</p>
+          <p>This experience has sharpened my ability to move from concept to working implementation faster, communicate technical decisions clearly, and think about systems as a whole — not just writing code, but understanding <strong>why</strong> the architecture is designed the way it is. It's the bridge between academic knowledge and professional readiness.</p>
+          <div class="training-highlights">
+            <div class="highlight-item"><i class="fas fa-server"></i><span>ASP.NET Core Development</span></div>
+            <div class="highlight-item"><i class="fas fa-network-wired"></i><span>RESTful API Design</span></div>
+            <div class="highlight-item"><i class="fas fa-database"></i><span>SQL Server &amp; EF Core</span></div>
+            <div class="highlight-item"><i class="fab fa-github"></i><span>Git &amp; Team Workflows</span></div>
+            <div class="highlight-item"><i class="fas fa-layer-group"></i><span>Full Stack Integration</span></div>
+            <div class="highlight-item"><i class="fas fa-industry"></i><span>Industry-Level Practices</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SKILLS ===== -->
+<section id="skills">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Skills</div>
+      <h2 class="section-title">My <span>Toolbox</span></h2>
+    </div>
+    <div class="skills-categories">
+      <div class="skill-category fade-up">
+        <div class="skill-cat-title">Frontend</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><i class="fab fa-html5"></i> HTML5</div>
+          <div class="skill-chip"><i class="fab fa-css3-alt"></i> CSS3</div>
+          <div class="skill-chip"><i class="fab fa-js"></i> JavaScript</div>
+          <div class="skill-chip"><i class="fab fa-js-square"></i> TypeScript</div>
+          <div class="skill-chip"><i class="fas fa-mobile-alt"></i> Responsive Design</div>
+        </div>
+      </div>
+      <div class="skill-category fade-up">
+        <div class="skill-cat-title">Backend</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><i class="fas fa-code"></i> C#</div>
+          <div class="skill-chip"><i class="fas fa-server"></i> ASP.NET Core</div>
+          <div class="skill-chip"><i class="fas fa-network-wired"></i> RESTful APIs</div>
+          <div class="skill-chip"><i class="fas fa-layer-group"></i> Entity Framework</div>
+        </div>
+      </div>
+      <div class="skill-category fade-up">
+        <div class="skill-cat-title">Database</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><i class="fas fa-database"></i> SQL Server</div>
+          <div class="skill-chip"><i class="fas fa-table"></i> Query Optimization</div>
+          <div class="skill-chip"><i class="fas fa-project-diagram"></i> Schema Design</div>
+        </div>
+      </div>
+      <div class="skill-category fade-up">
+        <div class="skill-cat-title">Tools</div>
+        <div class="skill-chips">
+          <div class="skill-chip"><i class="fab fa-github"></i> Git &amp; GitHub</div>
+          <div class="skill-chip"><i class="fas fa-laptop-code"></i> Visual Studio</div>
+          <div class="skill-chip"><i class="fas fa-code-branch"></i> VS Code</div>
+          <div class="skill-chip"><i class="fas fa-terminal"></i> CLI Tools</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROJECTS ===== -->
+<section id="projects">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Projects</div>
+      <h2 class="section-title">What I've <span>Built</span></h2>
+    </div>
+    <div class="projects-grid">
+      <div class="project-card fade-up">
+        <div class="project-img clinic"><span>🏥</span><div class="project-img-overlay"></div></div>
+        <div class="project-body">
+          <div class="project-title">Clinic Management System</div>
+          <p class="project-desc">A full-featured clinic platform handling patient records, appointment scheduling, doctor dashboards, and billing — built on a layered ASP.NET Core architecture with SQL Server as the backbone.</p>
+          <div class="tech-stack"><span class="tech-tag">C#</span><span class="tech-tag">ASP.NET Core</span><span class="tech-tag">SQL Server</span><span class="tech-tag">EF Core</span><span class="tech-tag">REST API</span></div>
+          <div class="project-links">
+            <a href="https://github.com/karim-stack00" target="_blank" rel="noopener noreferrer" class="project-link project-link-gh"><i class="fab fa-github"></i> GitHub</a>
+            <a href="#" class="project-link project-link-demo"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card fade-up">
+        <div class="project-img ecom"><span>🛒</span><div class="project-img-overlay"></div></div>
+        <div class="project-body">
+          <div class="project-title">E-Commerce Website</div>
+          <p class="project-desc">A scalable e-commerce platform with product catalog, shopping cart, secure checkout, order management, and admin panel — featuring JWT authentication and a responsive TypeScript frontend.</p>
+          <div class="tech-stack"><span class="tech-tag">ASP.NET Core</span><span class="tech-tag">TypeScript</span><span class="tech-tag">SQL Server</span><span class="tech-tag">JWT Auth</span><span class="tech-tag">REST API</span></div>
+          <div class="project-links">
+            <a href="https://github.com/karim-stack00" target="_blank" rel="noopener noreferrer" class="project-link project-link-gh"><i class="fab fa-github"></i> GitHub</a>
+            <a href="#" class="project-link project-link-demo"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+          </div>
+        </div>
+      </div>
+      <div class="project-card fade-up">
+        <div class="project-img learn"><span>🎓</span><div class="project-img-overlay"></div></div>
+        <div class="project-body">
+          <div class="project-title">Online Learning Platform</div>
+          <p class="project-desc">An LMS supporting course creation, student enrollment, video delivery, progress tracking, and instructor dashboards — built API-first with clean separation of concerns throughout.</p>
+          <div class="tech-stack"><span class="tech-tag">C#</span><span class="tech-tag">ASP.NET Core</span><span class="tech-tag">SQL Server</span><span class="tech-tag">JavaScript</span><span class="tech-tag">EF Core</span></div>
+          <div class="project-links">
+            <a href="https://github.com/karim-stack00" target="_blank" rel="noopener noreferrer" class="project-link project-link-gh"><i class="fab fa-github"></i> GitHub</a>
+            <a href="#" class="project-link project-link-demo"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT LINKS ===== -->
+<section id="contact-links">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Contact</div>
+      <h2 class="section-title">Get In <span>Touch</span></h2>
+    </div>
+    <div class="contact-grid fade-up">
+      <a href="tel:+201142970197" class="contact-card">
+        <div class="contact-icon"><i class="fas fa-phone"></i></div>
+        <div class="contact-info"><div class="contact-label">Phone</div><div class="contact-value">01142970197</div></div>
+      </a>
+      <a href="mailto:karim321top@gmail.com" class="contact-card">
+        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+        <div class="contact-info"><div class="contact-label">Email</div><div class="contact-value">karim321top@gmail.com</div></div>
+      </a>
+      <a href="https://www.linkedin.com/in/karim-hossam" target="_blank" rel="noopener noreferrer" class="contact-card">
+        <div class="contact-icon"><i class="fab fa-linkedin-in"></i></div>
+        <div class="contact-info"><div class="contact-label">LinkedIn</div><div class="contact-value">karim-hossam</div></div>
+      </a>
+      <a href="https://github.com/karim-stack00" target="_blank" rel="noopener noreferrer" class="contact-card">
+        <div class="contact-icon"><i class="fab fa-github"></i></div>
+        <div class="contact-info"><div class="contact-label">GitHub</div><div class="contact-value">karim-stack00</div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT FORM ===== -->
+<section id="contact-form-section">
+  <div class="container">
+    <div class="section-header fade-up">
+      <div class="section-label">Send Message</div>
+      <h2 class="section-title">Let's <span>Connect</span></h2>
+    </div>
+    <div class="form-wrap fade-up">
+      <div class="form-group">
+        <label class="form-label" for="name">Name <span>*</span></label>
+        <input class="form-input" id="name" type="text" placeholder="Your full name" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Email <span>*</span></label>
+        <input class="form-input" id="email" type="email" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="message">Message <span>*</span></label>
+        <textarea class="form-textarea" id="message" placeholder="Tell me about your project or just say hello..."></textarea>
+      </div>
+      <button class="form-submit" id="formSubmit"><i class="fas fa-paper-plane"></i> Send Message</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <p><span>&lt;</span> Designed &amp; built by <span>Karim Hossam</span> &nbsp;|&nbsp; © 2025 All rights reserved <span>/&gt;</span></p>
+</footer>
+
+<script>
+/* Loader */
+window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('hidden'),1950));
+
+/* Cursor */
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+(function ar(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(ar);})();
+document.querySelectorAll('a,button,.skill-chip,.project-card,.contact-card,.highlight-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='18px';cursor.style.height='18px';ring.style.width='48px';ring.style.height='48px';ring.style.borderColor='var(--cyan)';});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='10px';cursor.style.height='10px';ring.style.width='34px';ring.style.height='34px';ring.style.borderColor='var(--cyan-mid)';});
+});
+
+/* Typing */
+const roles=['Full Stack .NET Developer','ASP.NET Core Specialist','SQL Server Engineer','RESTful API Architect','C# Enthusiast','DEPI .NET Trainee','Backend Developer'];
+let ri=0,ci=0,del=false;
+const te=document.getElementById('typed-text');
+function type(){
+  const c=roles[ri];
+  if(!del){te.textContent=c.slice(0,++ci);if(ci===c.length){del=true;setTimeout(type,1900);return;}}
+  else{te.textContent=c.slice(0,--ci);if(ci===0){del=false;ri=(ri+1)%roles.length;}}
+  setTimeout(type,del?42:78);
+}
+setTimeout(type,1300);
+
+/* Navbar */
+const navbar=document.getElementById('navbar');
+const secs=document.querySelectorAll('section[id]');
+const nls=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  navbar.classList.toggle('scrolled',window.scrollY>50);
+  let cur='';
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-130)cur=s.id;});
+  nls.forEach(a=>{a.classList.remove('active');if(a.getAttribute('href')==='#'+cur)a.classList.add('active');});
+});
+
+/* Hamburger */
+const ham=document.getElementById('hamburger'),mob=document.getElementById('mobileMenu');
+ham.addEventListener('click',()=>{ham.classList.toggle('open');mob.classList.toggle('open');});
+mob.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{ham.classList.remove('open');mob.classList.remove('open');}));
+
+/* Scroll reveal */
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.08});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+/* Contact form */
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.className='toast '+type;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4200);
+}
+document.getElementById('formSubmit').addEventListener('click',()=>{
+  const n=document.getElementById('name'),e=document.getElementById('email'),m=document.getElementById('message');
+  let ok=true;
+  [n,e,m].forEach(f=>f.classList.remove('error'));
+  if(!n.value.trim()){n.classList.add('error');ok=false;}
+  if(!e.value.trim()||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.value)){e.classList.add('error');ok=false;}
+  if(!m.value.trim()){m.classList.add('error');ok=false;}
+  if(!ok){toast('Please fill in all required fields.','error');return;}
+  const btn=document.getElementById('formSubmit');
+  btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';btn.disabled=true;
+  setTimeout(()=>{
+    n.value='';e.value='';m.value='';
+    btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Message';btn.disabled=false;
+    toast("Message sent! I'll be in touch soon.",'success');
+  },1500);
+});
+</script>
+</body>
+</html>
